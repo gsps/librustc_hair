@@ -2,6 +2,8 @@
 //!
 //! This crate also contains the match exhaustiveness and usefulness checking.
 
+#![feature(rustc_private)]
+
 #![feature(box_patterns)]
 #![feature(box_syntax)]
 #![feature(const_if_match)]
@@ -17,8 +19,23 @@ extern crate log;
 #[macro_use]
 extern crate rustc_middle;
 
+extern crate rustc_arena;
+extern crate rustc_apfloat;
+extern crate rustc_attr;
+extern crate rustc_data_structures;
+extern crate rustc_index;
+extern crate rustc_errors;
+extern crate rustc_hir;
+extern crate rustc_infer;
+extern crate rustc_serialize;
+extern crate rustc_session;
+extern crate rustc_span;
+extern crate rustc_target;
+extern crate rustc_trait_selection;
+extern crate rustc_ast;
+
 mod build;
-mod hair;
+pub mod hair;
 mod lints;
 
 use rustc_middle::ty::query::Providers;

@@ -101,7 +101,7 @@ fn mirror_stmts<'a, 'tcx>(
     result
 }
 
-crate fn to_expr_ref<'a, 'tcx>(
+pub fn to_expr_ref<'a, 'tcx>(
     cx: &mut Cx<'a, 'tcx>,
     block: &'tcx hir::Block<'tcx>,
 ) -> ExprRef<'tcx> {

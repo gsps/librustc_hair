@@ -22,18 +22,18 @@ use rustc_target::abi::VariantIdx;
 use rustc_trait_selection::infer::InferCtxtExt;
 
 #[derive(Clone)]
-crate struct Cx<'a, 'tcx> {
+pub struct Cx<'a, 'tcx> {
     tcx: TyCtxt<'tcx>,
     infcx: &'a InferCtxt<'a, 'tcx>,
 
-    crate root_lint_level: hir::HirId,
-    crate param_env: ty::ParamEnv<'tcx>,
+    pub root_lint_level: hir::HirId,
+    pub param_env: ty::ParamEnv<'tcx>,
 
     /// Identity `InternalSubsts` for use with const-evaluation.
-    crate identity_substs: &'tcx InternalSubsts<'tcx>,
+    pub identity_substs: &'tcx InternalSubsts<'tcx>,
 
-    crate region_scope_tree: &'tcx region::ScopeTree,
-    crate tables: &'a ty::TypeckTables<'tcx>,
+    pub region_scope_tree: &'tcx region::ScopeTree,
+    pub tables: &'a ty::TypeckTables<'tcx>,
 
     /// This is `Constness::Const` if we are compiling a `static`,
     /// `const`, or the body of a `const fn`.
@@ -43,7 +43,7 @@ crate struct Cx<'a, 'tcx> {
     body_owner: DefId,
 
     /// What kind of body is being compiled.
-    crate body_owner_kind: hir::BodyOwnerKind,
+    pub body_owner_kind: hir::BodyOwnerKind,
 
     /// Whether this constant/function needs overflow checks.
     check_overflow: bool,
@@ -53,7 +53,7 @@ crate struct Cx<'a, 'tcx> {
 }
 
 impl<'a, 'tcx> Cx<'a, 'tcx> {
-    crate fn new(infcx: &'a InferCtxt<'a, 'tcx>, src_id: hir::HirId) -> Cx<'a, 'tcx> {
+    pub fn new(infcx: &'a InferCtxt<'a, 'tcx>, src_id: hir::HirId) -> Cx<'a, 'tcx> {
         let tcx = infcx.tcx;
         let src_def_id = tcx.hir().local_def_id(src_id);
         let tables = tcx.typeck_tables_of(src_def_id);
@@ -68,7 +68,7 @@ impl<'a, 'tcx> Cx<'a, 'tcx> {
 
         // Some functions always have overflow checks enabled,
         // however, they may not get codegen'd, depending on
-        // the settings for the crate they are codegened in.
+        // the settings for the pub they are codegened in.
         let mut check_overflow = attr::contains_name(attrs, sym::rustc_inherit_overflow_checks);
 
         // Respect -C overflow-checks.
@@ -93,42 +93,42 @@ impl<'a, 'tcx> Cx<'a, 'tcx> {
         }
     }
 
-    crate fn control_flow_destroyed(self) -> Vec<(Span, String)> {
+    pub fn control_flow_destroyed(self) -> Vec<(Span, String)> {
         self.control_flow_destroyed
     }
 }
 
 impl<'a, 'tcx> Cx<'a, 'tcx> {
     /// Normalizes `ast` into the appropriate "mirror" type.
-    crate fn mirror<M: Mirror<'tcx>>(&mut self, ast: M) -> M::Output {
+    pub fn mirror<M: Mirror<'tcx>>(&mut self, ast: M) -> M::Output {
         ast.make_mirror(self)
     }
 
-    crate fn usize_ty(&mut self) -> Ty<'tcx> {
+    pub fn usize_ty(&mut self) -> Ty<'tcx> {
         self.tcx.types.usize
     }
 
-    crate fn usize_literal(&mut self, value: u64) -> &'tcx ty::Const<'tcx> {
+    pub fn usize_literal(&mut self, value: u64) -> &'tcx ty::Const<'tcx> {
         ty::Const::from_usize(self.tcx, value)
     }
 
-    crate fn bool_ty(&mut self) -> Ty<'tcx> {
+    pub fn bool_ty(&mut self) -> Ty<'tcx> {
         self.tcx.types.bool
     }
 
-    crate fn unit_ty(&mut self) -> Ty<'tcx> {
+    pub fn unit_ty(&mut self) -> Ty<'tcx> {
         self.tcx.mk_unit()
     }
 
-    crate fn true_literal(&mut self) -> &'tcx ty::Const<'tcx> {
+    pub fn true_literal(&mut self) -> &'tcx ty::Const<'tcx> {
         ty::Const::from_bool(self.tcx, true)
     }
 
-    crate fn false_literal(&mut self) -> &'tcx ty::Const<'tcx> {
+    pub fn false_literal(&mut self) -> &'tcx ty::Const<'tcx> {
         ty::Const::from_bool(self.tcx, false)
     }
 
-    crate fn const_eval_literal(
+    pub fn const_eval_literal(
         &mut self,
         lit: &'tcx ast::LitKind,
         ty: Ty<'tcx>,
@@ -153,7 +153,7 @@ impl<'a, 'tcx> Cx<'a, 'tcx> {
         }
     }
 
-    crate fn pattern_from_hir(&mut self, p: &hir::Pat<'_>) -> Pat<'tcx> {
+    pub fn pattern_from_hir(&mut self, p: &hir::Pat<'_>) -> Pat<'tcx> {
         let p = match self.tcx.hir().get(p.hir_id) {
             Node::Pat(p) | Node::Binding(p) => p,
             node => bug!("pattern became {:?}", node),
@@ -161,7 +161,7 @@ impl<'a, 'tcx> Cx<'a, 'tcx> {
         Pat::from_hir(self.tcx, self.param_env, self.tables(), p)
     }
 
-    crate fn trait_method(
+    pub fn trait_method(
         &mut self,
         trait_def_id: DefId,
         method_name: Symbol,
@@ -184,27 +184,27 @@ impl<'a, 'tcx> Cx<'a, 'tcx> {
         ty::Const::zero_sized(self.tcx, method_ty)
     }
 
-    crate fn all_fields(&mut self, adt_def: &ty::AdtDef, variant_index: VariantIdx) -> Vec<Field> {
+    pub fn all_fields(&mut self, adt_def: &ty::AdtDef, variant_index: VariantIdx) -> Vec<Field> {
         (0..adt_def.variants[variant_index].fields.len()).map(Field::new).collect()
     }
 
-    crate fn needs_drop(&mut self, ty: Ty<'tcx>) -> bool {
+    pub fn needs_drop(&mut self, ty: Ty<'tcx>) -> bool {
         ty.needs_drop(self.tcx, self.param_env)
     }
 
-    crate fn tcx(&self) -> TyCtxt<'tcx> {
+    pub fn tcx(&self) -> TyCtxt<'tcx> {
         self.tcx
     }
 
-    crate fn tables(&self) -> &'a ty::TypeckTables<'tcx> {
+    pub fn tables(&self) -> &'a ty::TypeckTables<'tcx> {
         self.tables
     }
 
-    crate fn check_overflow(&self) -> bool {
+    pub fn check_overflow(&self) -> bool {
         self.check_overflow
     }
 
-    crate fn type_is_copy_modulo_regions(&self, ty: Ty<'tcx>, span: Span) -> bool {
+    pub fn type_is_copy_modulo_regions(&self, ty: Ty<'tcx>, span: Span) -> bool {
         self.infcx.type_is_copy_modulo_regions(self.param_env, ty, span)
     }
 }

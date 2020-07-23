@@ -31,7 +31,7 @@ use std::cmp::Ordering;
 use std::fmt;
 
 #[derive(Clone, Debug)]
-crate enum PatternError {
+pub enum PatternError {
     AssocConstInPattern(Span),
     ConstParamInPattern(Span),
     StaticInPattern(Span),
@@ -40,22 +40,22 @@ crate enum PatternError {
 }
 
 #[derive(Copy, Clone, Debug)]
-crate enum BindingMode {
+pub enum BindingMode {
     ByValue,
     ByRef(BorrowKind),
 }
 
 #[derive(Clone, Debug)]
-crate struct FieldPat<'tcx> {
-    crate field: Field,
-    crate pattern: Pat<'tcx>,
+pub struct FieldPat<'tcx> {
+    pub field: Field,
+    pub pattern: Pat<'tcx>,
 }
 
 #[derive(Clone, Debug)]
-crate struct Pat<'tcx> {
-    crate ty: Ty<'tcx>,
-    crate span: Span,
-    crate kind: Box<PatKind<'tcx>>,
+pub struct Pat<'tcx> {
+    pub ty: Ty<'tcx>,
+    pub span: Span,
+    pub kind: Box<PatKind<'tcx>>,
 }
 
 impl<'tcx> Pat<'tcx> {
@@ -65,8 +65,8 @@ impl<'tcx> Pat<'tcx> {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-crate struct PatTyProj<'tcx> {
-    crate user_ty: CanonicalUserType<'tcx>,
+pub struct PatTyProj<'tcx> {
+    pub user_ty: CanonicalUserType<'tcx>,
 }
 
 impl<'tcx> PatTyProj<'tcx> {
@@ -92,8 +92,8 @@ impl<'tcx> PatTyProj<'tcx> {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-crate struct Ascription<'tcx> {
-    crate user_ty: PatTyProj<'tcx>,
+pub struct Ascription<'tcx> {
+    pub user_ty: PatTyProj<'tcx>,
     /// Variance to use when relating the type `user_ty` to the **type of the value being
     /// matched**. Typically, this is `Variance::Covariant`, since the value being matched must
     /// have a type that is some subtype of the ascribed type.
@@ -112,12 +112,12 @@ crate struct Ascription<'tcx> {
     /// requires that `&'static str <: T_x`, where `T_x` is the type of `x`. Really, we should
     /// probably be checking for a `PartialEq` impl instead, but this preserves the behavior
     /// of the old type-check for now. See #57280 for details.
-    crate variance: ty::Variance,
-    crate user_ty_span: Span,
+    pub variance: ty::Variance,
+    pub user_ty_span: Span,
 }
 
 #[derive(Clone, Debug)]
-crate enum PatKind<'tcx> {
+pub enum PatKind<'tcx> {
     Wild,
 
     AscribeUserType {
@@ -188,10 +188,10 @@ crate enum PatKind<'tcx> {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-crate struct PatRange<'tcx> {
-    crate lo: &'tcx ty::Const<'tcx>,
-    crate hi: &'tcx ty::Const<'tcx>,
-    crate end: RangeEnd,
+pub struct PatRange<'tcx> {
+    pub lo: &'tcx ty::Const<'tcx>,
+    pub hi: &'tcx ty::Const<'tcx>,
+    pub end: RangeEnd,
 }
 
 impl<'tcx> fmt::Display for Pat<'tcx> {
@@ -346,16 +346,16 @@ impl<'tcx> fmt::Display for Pat<'tcx> {
     }
 }
 
-crate struct PatCtxt<'a, 'tcx> {
-    crate tcx: TyCtxt<'tcx>,
-    crate param_env: ty::ParamEnv<'tcx>,
-    crate tables: &'a ty::TypeckTables<'tcx>,
-    crate errors: Vec<PatternError>,
+pub struct PatCtxt<'a, 'tcx> {
+    pub tcx: TyCtxt<'tcx>,
+    pub param_env: ty::ParamEnv<'tcx>,
+    pub tables: &'a ty::TypeckTables<'tcx>,
+    pub errors: Vec<PatternError>,
     include_lint_checks: bool,
 }
 
 impl<'a, 'tcx> Pat<'tcx> {
-    crate fn from_hir(
+    pub fn from_hir(
         tcx: TyCtxt<'tcx>,
         param_env: ty::ParamEnv<'tcx>,
         tables: &'a ty::TypeckTables<'tcx>,
@@ -373,7 +373,7 @@ impl<'a, 'tcx> Pat<'tcx> {
 }
 
 impl<'a, 'tcx> PatCtxt<'a, 'tcx> {
-    crate fn new(
+    pub fn new(
         tcx: TyCtxt<'tcx>,
         param_env: ty::ParamEnv<'tcx>,
         tables: &'a ty::TypeckTables<'tcx>,
@@ -381,12 +381,12 @@ impl<'a, 'tcx> PatCtxt<'a, 'tcx> {
         PatCtxt { tcx, param_env, tables, errors: vec![], include_lint_checks: false }
     }
 
-    crate fn include_lint_checks(&mut self) -> &mut Self {
+    pub fn include_lint_checks(&mut self) -> &mut Self {
         self.include_lint_checks = true;
         self
     }
 
-    crate fn lower_pattern(&mut self, pat: &'tcx hir::Pat<'tcx>) -> Pat<'tcx> {
+    pub fn lower_pattern(&mut self, pat: &'tcx hir::Pat<'tcx>) -> Pat<'tcx> {
         // When implicit dereferences have been inserted in this pattern, the unadjusted lowered
         // pattern has the type that results *after* dereferencing. For example, in this code:
         //
@@ -886,7 +886,7 @@ impl<'tcx> UserAnnotatedTyHelpers<'tcx> for PatCtxt<'_, 'tcx> {
     }
 }
 
-crate trait PatternFoldable<'tcx>: Sized {
+pub trait PatternFoldable<'tcx>: Sized {
     fn fold_with<F: PatternFolder<'tcx>>(&self, folder: &mut F) -> Self {
         self.super_fold_with(folder)
     }
@@ -894,7 +894,7 @@ crate trait PatternFoldable<'tcx>: Sized {
     fn super_fold_with<F: PatternFolder<'tcx>>(&self, folder: &mut F) -> Self;
 }
 
-crate trait PatternFolder<'tcx>: Sized {
+pub trait PatternFolder<'tcx>: Sized {
     fn fold_pattern(&mut self, pattern: &Pat<'tcx>) -> Pat<'tcx> {
         pattern.super_fold_with(self)
     }
@@ -1023,7 +1023,7 @@ impl<'tcx> PatternFoldable<'tcx> for PatKind<'tcx> {
     }
 }
 
-crate fn compare_const_vals<'tcx>(
+pub fn compare_const_vals<'tcx>(
     tcx: TyCtxt<'tcx>,
     a: &'tcx ty::Const<'tcx>,
     b: &'tcx ty::Const<'tcx>,

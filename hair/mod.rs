@@ -18,34 +18,34 @@ use rustc_span::Span;
 use rustc_target::abi::VariantIdx;
 use rustc_target::asm::InlineAsmRegOrRegClass;
 
-crate mod constant;
-crate mod cx;
+pub mod constant;
+pub mod cx;
 
-crate mod pattern;
-crate use self::pattern::PatTyProj;
-crate use self::pattern::{BindingMode, FieldPat, Pat, PatKind, PatRange};
+pub mod pattern;
+pub use self::pattern::PatTyProj;
+pub use self::pattern::{BindingMode, FieldPat, Pat, PatKind, PatRange};
 
 mod util;
 
 #[derive(Copy, Clone, Debug)]
-crate enum LintLevel {
+pub enum LintLevel {
     Inherited,
     Explicit(hir::HirId),
 }
 
 #[derive(Clone, Debug)]
-crate struct Block<'tcx> {
-    crate targeted_by_break: bool,
-    crate region_scope: region::Scope,
-    crate opt_destruction_scope: Option<region::Scope>,
-    crate span: Span,
-    crate stmts: Vec<StmtRef<'tcx>>,
-    crate expr: Option<ExprRef<'tcx>>,
-    crate safety_mode: BlockSafety,
+pub struct Block<'tcx> {
+    pub targeted_by_break: bool,
+    pub region_scope: region::Scope,
+    pub opt_destruction_scope: Option<region::Scope>,
+    pub span: Span,
+    pub stmts: Vec<StmtRef<'tcx>>,
+    pub expr: Option<ExprRef<'tcx>>,
+    pub safety_mode: BlockSafety,
 }
 
 #[derive(Copy, Clone, Debug)]
-crate enum BlockSafety {
+pub enum BlockSafety {
     Safe,
     ExplicitUnsafe(hir::HirId),
     PushUnsafe,
@@ -53,18 +53,18 @@ crate enum BlockSafety {
 }
 
 #[derive(Clone, Debug)]
-crate enum StmtRef<'tcx> {
+pub enum StmtRef<'tcx> {
     Mirror(Box<Stmt<'tcx>>),
 }
 
 #[derive(Clone, Debug)]
-crate struct Stmt<'tcx> {
-    crate kind: StmtKind<'tcx>,
-    crate opt_destruction_scope: Option<region::Scope>,
+pub struct Stmt<'tcx> {
+    pub kind: StmtKind<'tcx>,
+    pub opt_destruction_scope: Option<region::Scope>,
 }
 
 #[derive(Clone, Debug)]
-crate enum StmtKind<'tcx> {
+pub enum StmtKind<'tcx> {
     Expr {
         /// scope for this statement; may be used as lifetime of temporaries
         scope: region::Scope,
@@ -114,23 +114,23 @@ rustc_data_structures::static_assert_size!(Expr<'_>, 168);
 /// example, method calls and overloaded operators are absent: they are
 /// expected to be converted into `Expr::Call` instances.
 #[derive(Clone, Debug)]
-crate struct Expr<'tcx> {
+pub struct Expr<'tcx> {
     /// type of this expression
-    crate ty: Ty<'tcx>,
+    pub ty: Ty<'tcx>,
 
     /// lifetime of this expression if it should be spilled into a
     /// temporary; should be None only if in a constant context
-    crate temp_lifetime: Option<region::Scope>,
+    pub temp_lifetime: Option<region::Scope>,
 
     /// span of the expression in the source
-    crate span: Span,
+    pub span: Span,
 
     /// kind of expression
-    crate kind: ExprKind<'tcx>,
+    pub kind: ExprKind<'tcx>,
 }
 
 #[derive(Clone, Debug)]
-crate enum ExprKind<'tcx> {
+pub enum ExprKind<'tcx> {
     Scope {
         region_scope: region::Scope,
         lint_level: LintLevel,
@@ -298,46 +298,46 @@ crate enum ExprKind<'tcx> {
 }
 
 #[derive(Clone, Debug)]
-crate enum ExprRef<'tcx> {
+pub enum ExprRef<'tcx> {
     Hair(&'tcx hir::Expr<'tcx>),
     Mirror(Box<Expr<'tcx>>),
 }
 
 #[derive(Clone, Debug)]
-crate struct FieldExprRef<'tcx> {
-    crate name: Field,
-    crate expr: ExprRef<'tcx>,
+pub struct FieldExprRef<'tcx> {
+    pub name: Field,
+    pub expr: ExprRef<'tcx>,
 }
 
 #[derive(Clone, Debug)]
-crate struct FruInfo<'tcx> {
-    crate base: ExprRef<'tcx>,
-    crate field_types: Vec<Ty<'tcx>>,
+pub struct FruInfo<'tcx> {
+    pub base: ExprRef<'tcx>,
+    pub field_types: Vec<Ty<'tcx>>,
 }
 
 #[derive(Clone, Debug)]
-crate struct Arm<'tcx> {
-    crate pattern: Pat<'tcx>,
-    crate guard: Option<Guard<'tcx>>,
-    crate body: ExprRef<'tcx>,
-    crate lint_level: LintLevel,
-    crate scope: region::Scope,
-    crate span: Span,
+pub struct Arm<'tcx> {
+    pub pattern: Pat<'tcx>,
+    pub guard: Option<Guard<'tcx>>,
+    pub body: ExprRef<'tcx>,
+    pub lint_level: LintLevel,
+    pub scope: region::Scope,
+    pub span: Span,
 }
 
 #[derive(Clone, Debug)]
-crate enum Guard<'tcx> {
+pub enum Guard<'tcx> {
     If(ExprRef<'tcx>),
 }
 
 #[derive(Copy, Clone, Debug)]
-crate enum LogicalOp {
+pub enum LogicalOp {
     And,
     Or,
 }
 
 impl<'tcx> ExprRef<'tcx> {
-    crate fn span(&self) -> Span {
+    pub fn span(&self) -> Span {
         match self {
             ExprRef::Hair(expr) => expr.span,
             ExprRef::Mirror(expr) => expr.span,
@@ -346,7 +346,7 @@ impl<'tcx> ExprRef<'tcx> {
 }
 
 #[derive(Clone, Debug)]
-crate enum InlineAsmOperand<'tcx> {
+pub enum InlineAsmOperand<'tcx> {
     In {
         reg: InlineAsmRegOrRegClass,
         expr: ExprRef<'tcx>,
@@ -393,7 +393,7 @@ crate enum InlineAsmOperand<'tcx> {
 /// mirrored. This allows a single AST node from the compiler to
 /// expand into one or more Hair nodes, which lets the Hair nodes be
 /// simpler.
-crate trait Mirror<'tcx> {
+pub trait Mirror<'tcx> {
     type Output;
 
     fn make_mirror(self, cx: &mut Cx<'_, 'tcx>) -> Self::Output;
