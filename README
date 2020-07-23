@@ -1,0 +1,15 @@
+# librustc_hair
+
+This repo is essentially a mirror for librustc_mir_build (which is part of rustc), but with several modules set to public visibility. This allows the HAIR data structures and translation from HIR to HAIR to be used from other crates.
+
+## Maintenance
+
+To stay up-to-date with rustc, this mirror will have to change every so often. At the moment this is done manually, following roughly these steps:
+- Find out the desired rustc `COMMIT` by running `rustc --version` in the project which has the appropriate `rust-toolchain` file present.
+- Do an initial (perhaps shallow) checkout of the [rustc repo](https://github.com/rust-lang/rust) at the desired `COMMIT`.
+- Check out a new branch in this repo named correspondingly to the version seen before in `rust-toolchain`.
+- Copy the files from the rustc repo in subfolder `src/librustc_mir_build` into the top-level folder of this repo.
+- Apply the floating patch that adapts `Cargo.toml`, `lib.rs` and the visibility of various items in the crate.
+
+In the future, we could perhaps check out only the corresponding subdirectory of the rustc repo and maintain a proper Git repo with history (see [this StackOverflow answer](https://stackoverflow.com/a/52269934)).
+
