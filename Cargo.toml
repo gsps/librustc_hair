@@ -11,4 +11,4 @@ doctest = false
 
 [dependencies]
 log = "0.4"
-smallvec = { version = "1.0", features = ["union", "may_dangle"] }
+smallvec = { version = "=1.5.1", features = ["union", "may_dangle"] }
